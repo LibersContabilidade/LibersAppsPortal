@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Custos - Liber's Assessoria</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-gray-100 to-orange-50 min-h-screen">
+    
+    <!-- Header -->
+    <div class="bg-white shadow-2xl border-b-4 border-orange-500">
+        <div class="max-w-7xl mx-auto px-4 py-6 md:py-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-6">
+                    <img id="logo" alt="Liber's Assessoria Contábil" class="h-24 md:h-32 w-auto">
+                    <div class="hidden md:block w-px h-20 bg-gray-300"></div>
+                    <div class="text-center md:text-left">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="bg-gradient-to-br from-orange-500 to-orange-600 p-2 rounded-xl shadow-lg">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <h1 class="text-xl md:text-2xl font-bold text-gray-800">
+                                Calculadora de Custos
+                            </h1>
+                        </div>
+                        <p class="text-orange-600 font-semibold text-sm md:text-base">
+                            Calcule todos os encargos trabalhistas
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-6 md:py-8 space-y-6">
+        
+        <!-- Seleção Rápida -->
+        <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl shadow-xl p-6 md:p-8 text-white">
+            <h2 class="text-2xl font-bold mb-6">⚡ Seleção Rápida</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-bold mb-2 uppercase tracking-wide">Selecione a Empresa</label>
+                    <select id="empresaSelecionada" class="w-full px-4 py-3 border-2 border-white rounded-xl text-gray-800 font-semibold">
+                        <option value="">-- Selecione uma empresa --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-2 uppercase tracking-wide">Selecione o Funcionário</label>
+                    <select id="funcionarioSelecionado" class="w-full px-4 py-3 border-2 border-white rounded-xl text-gray-800 font-semibold">
+                        <option value="">-- Selecione um funcionário --</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dados da Empresa e Funcionário -->
+        <div class="bg-white rounded-2xl shadow-xl border-t-4 border-orange-500 p-6 md:p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">📊 Dados da Empresa e Funcionário</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase">Nome da Empresa</label>
+                    <input type="text" id="nomeEmpresa" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl" placeholder="Digite o nome da empresa">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase">CNPJ</label>
+                    <input type="text" id="cnpj" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl" placeholder="00.000.000/0000-00">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase">Nome do Funcionário</label>
+                    <input type="text" id="nomeFuncionario" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl" placeholder="Digite o nome">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase">Salário Base (Mensal)</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-lg">R$</span>
+                        <input type="number" id="salarioBase" class="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl font-bold text-xl" placeholder="0,00" step="0.01">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Descontos -->
+        <div class="bg-white rounded-2xl shadow-xl border-t-4 border-orange-500 p-6 md:p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">💳 Descontos em Folha</h2>
+            <div class="space-y-4">
+                <label class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-xl bg-gray-50">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="descontoINSS" checked class="w-5 h-5 text-orange-500 rounded">
+                        <span class="text-gray-800 font-semibold">INSS (Progressivo)</span>
+                    </div>
+                    <span id="valorINSS" class="text-orange-600 font-bold">R$ 0,00</span>
+                </label>
+                
+                <div class="border-2 border-gray-200 rounded-xl p-4 bg-gray-50">
+                    <label class="flex items-center gap-3 mb-3">
+                        <input type="checkbox" id="descontoVT" class="w-5 h-5 text-orange-500 rounded">
+                        <span class="text-gray-800 font-semibold">Vale Transporte (máx 6%)</span>
+                    </label>
+                    <div id="campoVT" class="ml-8 hidden">
+                        <label class="block text-sm font-semibold text-gray-600 mb-2">Valor do desconto</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">R$</span>
+                            <input type="number" id="valorVT" class="w-full pl-10 px-4 py-2 border rounded-lg" placeholder="0,00" step="0.01">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-2 border-gray-200 rounded-xl p-4 bg-gray-50">
+                    <label class="flex items-center gap-3 mb-3">
+                        <input type="checkbox" id="descontoContribAssistencial" class="w-5 h-5 text-orange-500 rounded">
+                        <span class="text-gray-800 font-semibold">Contribuição Assistencial</span>
+                    </label>
+                    <div id="campoContribAssistencial" class="ml-8 hidden">
+                        <label class="block text-sm font-semibold text-gray-600 mb-2">Valor do desconto</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">R$</span>
+                            <input type="number" id="valorContribAssistencial" class="w-full pl-10 px-4 py-2 border rounded-lg" placeholder="0,00" step="0.01">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-2 border-gray-200 rounded-xl p-4 bg-gray-50">
+                    <label class="flex items-center gap-3 mb-3">
+                        <input type="checkbox" id="descontoConsignado" class="w-5 h-5 text-orange-500 rounded">
+                        <span class="text-gray-800 font-semibold">Empréstimo Consignado</span>
+                    </label>
+                    <div id="campoConsignado" class="ml-8 hidden">
+                        <label class="block text-sm font-semibold text-gray-600 mb-2">Valor do desconto</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">R$</span>
+                            <input type="number" id="valorConsignado" class="w-full pl-10 px-4 py-2 border rounded-lg" placeholder="0,00" step="0.01">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 bg-gradient-to-r from-red-500 to-red-600 rounded-xl p-5 text-white">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm opacity-90">Total de Descontos</p>
+                        <p id="totalDescontos" class="font-bold text-2xl">R$ 0,00</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm opacity-90">Salário Líquido</p>
+                        <p id="salarioLiquido" class="font-bold text-2xl">R$ 0,00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Encargos Patronais -->
+        <div class="bg-white rounded-2xl shadow-xl border-t-4 border-orange-500 p-6 md:p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">🏢 Encargos da Empresa</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase">Percentual Patronal + RAT + FAP (%)</label>
+                    <input type="number" id="percentualPatronal" value="26.8" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl font-bold" step="0.1">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase">Percentual FGTS (%)</label>
+                    <input type="number" id="percentualFGTS" value="8.0" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl font-bold" step="0.1">
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="grid lg:grid-cols-2 gap-6">
+            <!-- Custos Mensais -->
+            <div class="bg-white rounded-2xl shadow-xl border-t-4 border-orange-500 p-6 md:p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">💰 Custos Mensais</h2>
+                <div id="custosMensais" class="space-y-3"></div>
+                <div class="mt-6 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
+                    <p class="text-sm opacity-90 uppercase">Encargos Mensais</p>
+                    <p id="custoMensalTotal" class="font-bold text-3xl mt-1">R$ 0,00</p>
+                    <p class="text-xs opacity-75 mt-1">Custos além do salário</p>
+                </div>
+                <div class="mt-4 bg-gray-800 rounded-xl p-5 text-white">
+                    <div class="flex justify-between items-center">
+                        <span class="font-semibold">Custo Total da Empresa</span>
+                        <span id="custoMensalComSalario" class="font-bold text-2xl">R$ 0,00</span>
+                    </div>
+                    <p class="text-xs text-gray-300 mt-2">Salário Bruto + Encargos</p>
+                </div>
+            </div>
+
+            <!-- Custos Anuais -->
+            <div class="bg-white rounded-2xl shadow-xl border-t-4 border-orange-500 p-6 md:p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">📈 Custos Anuais</h2>
+                <div id="custosAnuais" class="space-y-3"></div>
+                <div class="mt-6 bg-gradient-to-r from-red-500 to-red-600 rounded-xl p-6 text-white">
+                    <p class="text-sm opacity-90 uppercase">Encargos Anuais</p>
+                    <p id="custoAnualTotal" class="font-bold text-3xl mt-1">R$ 0,00</p>
+                    <p class="text-xs opacity-75 mt-1">Custos além dos salários</p>
+                </div>
+                <div class="mt-4 bg-gray-800 rounded-xl p-5 text-white">
+                    <div class="flex justify-between items-center">
+                        <span class="font-semibold">Custo Total da Empresa (Anual)</span>
+                        <span id="custoAnualComSalarios" class="font-bold text-2xl">R$ 0,00</span>
+                    </div>
+                    <p class="text-xs text-gray-300 mt-2">Salários Brutos (12x) + Encargos Anuais</p>
+                </div>
+                <div class="mt-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg p-4">
+                    <p class="text-sm text-yellow-800 font-semibold mb-1">💡 Multa FGTS (Rescisão)</p>
+                    <p class="text-sm text-yellow-700">Valor estimado: <strong id="multaFGTS">R$ 0,00</strong></p>
+                    <p class="text-xs text-yellow-600 mt-1">Devida apenas em demissão sem justa causa pela empresa.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Explicação Custo vs Salário -->
+        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl shadow-xl border-l-4 border-green-500 p-6 md:p-8">
+            <h3 class="text-lg font-bold text-green-900 mb-4">💡 Entenda o Fluxo do Dinheiro</h3>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="bg-blue-100 rounded-xl p-4 border-2 border-blue-300">
+                    <p class="text-xs text-blue-700 font-semibold uppercase mb-2">💼 Empresa Paga</p>
+                    <p id="explicacaoBruto" class="text-2xl font-bold text-blue-800">R$ 0,00</p>
+                    <p class="text-xs text-blue-600 mt-1">Salário Bruto (registrado em carteira)</p>
+                </div>
+                <div class="bg-red-100 rounded-xl p-4 border-2 border-red-300">
+                    <p class="text-xs text-red-700 font-semibold uppercase mb-2">➖ Descontos</p>
+                    <p id="explicacaoDescontos" class="text-2xl font-bold text-red-600">R$ 0,00</p>
+                    <p class="text-xs text-red-600 mt-1">INSS, Vale Transporte, etc.</p>
+                </div>
+                <div class="bg-green-100 rounded-xl p-4 border-2 border-green-400">
+                    <p class="text-xs text-green-700 font-semibold uppercase mb-2">💰 Funcionário Recebe</p>
+                    <p id="explicacaoLiquido" class="text-2xl font-bold text-green-700">R$ 0,00</p>
+                    <p class="text-xs text-green-600 mt-1">Salário Líquido (cai na conta)</p>
+                </div>
+            </div>
+            <div class="mt-4 bg-yellow-50 rounded-xl p-4 border-l-4 border-yellow-400">
+                <p class="text-sm text-gray-800 mb-2">
+                    <strong>📌 Como funciona:</strong>
+                </p>
+                <ul class="text-sm text-gray-700 space-y-1">
+                    <li>• A empresa paga o <strong>Salário Bruto</strong> (ex: R$ 2.400,00)</li>
+                    <li>• São descontados INSS, Vale Transporte, etc. (ex: R$ 324,00)</li>
+                    <li>• O funcionário recebe o <strong>Salário Líquido</strong> na conta (ex: R$ 2.076,00)</li>
+                    <li>• <strong class="text-orange-600">Custo Total da Empresa = Salário Bruto + Encargos Patronais</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Observações -->
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl shadow-xl border-l-4 border-blue-500 p-6 md:p-8">
+            <h3 class="text-lg font-bold text-blue-900 mb-3">📋 Observações Importantes</h3>
+            <ul class="space-y-2 text-blue-800 text-sm">
+                <li>• A multa do FGTS (40%) é devida apenas na demissão sem justa causa por iniciativa da empresa.</li>
+                <li>• O funcionário tem direito ao aviso prévio indenizado (1 salário + 3 dias por ano trabalhado).</li>
+                <li>• Os percentuais de Patronal + RAT + FAP variam conforme o ramo de atividade.</li>
+                <li>• Esta calculadora utiliza a tabela INSS 2024/2025 com alíquotas progressivas.</li>
+            </ul>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <img id="logoFooter" alt="Liber's" class="h-20 w-auto mx-auto mb-4">
+            <p class="text-gray-700 font-bold text-lg mb-2">LIBER'S ASSESSORIA CONTÁBIL</p>
+            <p class="text-gray-600 font-medium">Simplificando sua contabilidade</p>
+            <p class="text-gray-500 text-sm mt-4">Cálculos baseados na legislação vigente</p>
+        </div>
+    </div>
+
+    <script>
+        // Dados
+        const EMPRESAS = [
+            { nome: "ORAL UNIC ODONTOLOGIA LAPA LTDA", cnpj: "00.000.000/0000-00" },
+            { nome: "ORAL UNIC ODONTOLOGIA OSASCO LTDA", cnpj: "00.000.000/0000-00" },
+            { nome: "ORAL UNIC ODONTOLOGIA SANTO AMARO LTDA", cnpj: "00.000.000/0000-00" }
+        ];
+
+        const FUNCIONARIOS = [
+            { nome: "JEAN CARLOS PEREIRA DA SILVA", empresa: "ORAL UNIC ODONTOLOGIA LAPA LTDA", salario: 2400.0, percentual_patronal: 26.8, descontos: "INSS + VALE TRANSPORTE" },
+            { nome: "BRUNA LEITE DA SILVA FERREIRA", empresa: "ORAL UNIC ODONTOLOGIA LAPA LTDA", salario: 1804.0, percentual_patronal: 26.8, descontos: "INSS + VALE TRANSPORTE" },
+            { nome: "THAYLLA SHARON DE SOUSA CASTILHO", empresa: "ORAL UNIC ODONTOLOGIA OSASCO LTDA", salario: 2350.0, percentual_patronal: 26.3, descontos: "INSS + VALE TRANSPORTE + CONTRIBUIÇÃO ASSISTENCIAL" },
+            { nome: "JESSICA FERREIRA DE MIRANDA", empresa: "ORAL UNIC ODONTOLOGIA SANTO AMARO LTDA", salario: 2106.4, percentual_patronal: 26.5, descontos: "INSS + VALE TRANSPORTE + CONSIGNADO" }
+        ];
+
+        // Formatar moeda
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+        }
+
+        // Calcular INSS
+        function calcularINSS(salario) {
+            if (!document.getElementById('descontoINSS').checked) return 0;
+            
+            let inss = 0;
+            if (salario <= 1412) {
+                inss = salario * 0.075;
+            } else if (salario <= 2666.68) {
+                inss = 1412 * 0.075 + (salario - 1412) * 0.09;
+            } else if (salario <= 4000.03) {
+                inss = 1412 * 0.075 + (2666.68 - 1412) * 0.09 + (salario - 2666.68) * 0.12;
+            } else {
+                inss = 1412 * 0.075 + (2666.68 - 1412) * 0.09 + (4000.03 - 2666.68) * 0.12 + 
+                       (Math.min(salario, 7786.02) - 4000.03) * 0.14;
+            }
+            return inss;
+        }
+
+        // Calcular tudo
+        function calcular() {
+            const salario = parseFloat(document.getElementById('salarioBase').value) || 0;
+            const percPatronal = parseFloat(document.getElementById('percentualPatronal').value) || 26.8;
+            const percFGTS = parseFloat(document.getElementById('percentualFGTS').value) || 8.0;
+            
+            // Descontos
+            const inss = calcularINSS(salario);
+            const vt = document.getElementById('descontoVT').checked ? (parseFloat(document.getElementById('valorVT').value) || 0) : 0;
+            const contribAssist = document.getElementById('descontoContribAssistencial').checked ? (parseFloat(document.getElementById('valorContribAssistencial').value) || 0) : 0;
+            const consignado = document.getElementById('descontoConsignado').checked ? (parseFloat(document.getElementById('valorConsignado').value) || 0) : 0;
+            const totalDescontos = inss + vt + contribAssist + consignado;
+            const salarioLiq = salario - totalDescontos;
+            
+            // Encargos mensais
+            const patronal = salario * (percPatronal / 100);
+            const fgts = salario * (percFGTS / 100);
+            const ferias = (salario / 3) / 12;
+            const decimo = salario / 12;
+            const fgts13 = (salario * (percFGTS / 100)) / 12;
+            const patronal13 = (salario * (percPatronal / 100)) / 12;
+            
+            const custoMensal = patronal + fgts + ferias + decimo + fgts13 + patronal13;
+            
+            // Encargos anuais
+            const custoAnual = (patronal * 12) + (fgts * 12) + (salario / 3) + salario + 
+                              (salario * percFGTS / 100) + (salario * percPatronal / 100);
+            const multaFGTS = salario * 12 * 0.08 * 0.40;
+            
+            // Atualizar UI
+            document.getElementById('valorINSS').textContent = formatarMoeda(inss);
+            document.getElementById('totalDescontos').textContent = formatarMoeda(totalDescontos);
+            document.getElementById('salarioLiquido').textContent = formatarMoeda(salarioLiq);
+            
+            // Atualizar máximo do VT (6% do salário)
+            const maxVT = salario * 0.06;
+            document.getElementById('maxVT').textContent = formatarMoeda(maxVT);
+            
+            // Custos mensais
+            document.getElementById('custosMensais').innerHTML = `
+                <div class="flex justify-between py-3 border-b-2 border-gray-100">
+                    <span class="text-gray-700">Patronal + RAT + FAP (${percPatronal}%)</span>
+                    <span class="font-bold text-gray-900">${formatarMoeda(patronal)}</span>
+                </div>
+                <div class="flex justify-between py-3 border-b-2 border-gray-100">
+                    <span class="text-gray-700">FGTS (${percFGTS}%)</span>
+                    <span class="font-bold text-gray-900">${formatarMoeda(fgts)}</span>
+                </div>
+                <div class="flex justify-between py-3 border-b-2 border-gray-100">
+                    <span class="text-gray-700">Provisão 1/3 Férias</span>
+                    <span class="font-bold text-gray-900">${formatarMoeda(ferias)}</span>
+                </div>
+                <div class="flex justify-between py-3 border-b-2 border-gray-100">
+                    <span class="text-gray-700">Provisão 13º Salário</span>
+                    <span class="font-bold text-gray-900">${formatarMoeda(decimo)}</span>
+                </div>
+                <div class="flex justify-between py-3 border-b-2 border-gray-100">
+                    <span class="text-gray-700">Provisão FGTS 13º</span>
+                    <span class="font-bold text-gray-900">${formatarMoeda(fgts13)}</span>
+                </div>
+                <div class="flex justify-between py-3 border-b-2 border-gray-100">
+                    <span class="text-gray-700">Provisão Patronal 13º</span>
+                    <span class="font-bold text-gray-900">${formatarMoeda(patronal13)}</span>
+                </div>
+            `;
+            
+            document.getElementById('custoMensalTotal').textContent = formatarMoeda(custoMensal);
+            document.getElementById('custoMensalComSalario').textContent = formatarMoeda(salario + custoMensal);
+            
+            // Explicação
+            document.getElementById('explicacaoBruto').textContent = formatarMoeda(salario);
+            document.getElementById('explicacaoDescontos').textContent = formatarMoeda(totalDescontos);
+            document.getElementById('explicacaoLiquido').textContent = formatarMoeda(salarioLiq);
+            
+            // Custos anuais
+            document.getElementById('custosAnuais').innerHTML = `
+                <div class="flex justify-between py-3 border-b-2 border-gray-100">
+                    <span class="text-gray-700">Patronal + RAT + FAP (12x)</span>
+                    <span class="font-bold text-gray-900">${formatarMoeda(patronal * 12)}</span>
+                </div>
+                <div class="flex justify-between py-3 border-b-2 border-gray-100">
+                    <span class="text-gray-700">FGTS (12x)</span>
+                    <span class="font-bold text-gray-900">${formatarMoeda(fgts * 12)}</span>
+                </div>
+                <div class="flex justify-between py-3 border-b-2 border-gray-100">
+                    <span class="text-gray-700">1/3 de Férias</span>
+                    <span class="font-bold text-gray-900">${formatarMoeda(salario / 3)}</span>
+                </div>
+                <div class="flex justify-between py-3 border-b-2 border-gray-100">
+                    <span class="text-gray-700">13º Salário</span>
+                    <span class="font-bold text-gray-900">${formatarMoeda(salario)}</span>
+                </div>
+                <div class="flex justify-between py-3 border-b-2 border-gray-100">
+                    <span class="text-gray-700">FGTS 13º</span>
+                    <span class="font-bold text-gray-900">${formatarMoeda(salario * percFGTS / 100)}</span>
+                </div>
+                <div class="flex justify-between py-3 border-b-2 border-gray-100">
+                    <span class="text-gray-700">Patronal 13º</span>
+                    <span class="font-bold text-gray-900">${formatarMoeda(salario * percPatronal / 100)}</span>
+                </div>
+            `;
+            
+            document.getElementById('custoAnualTotal').textContent = formatarMoeda(custoAnual);
+            document.getElementById('custoAnualComSalarios').textContent = formatarMoeda((salario * 12) + custoAnual);
+            document.getElementById('multaFGTS').textContent = formatarMoeda(multaFGTS);
+        }
+
+        // Carregar logo (substitua pela logo real em produção)
+        const logoSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 120'%3E%3Ctext x='20' y='60' font-family='Arial Black' font-size='48' fill='%23FF8C42'%3ELIBER'S%3C/text%3E%3Ctext x='20' y='85' font-family='Arial' font-size='14' fill='%23FF8C42' letter-spacing='2'%3EASSESSORIA CONTÁBIL%3C/text%3E%3C/svg%3E`;
+        document.getElementById('logo').src = logoSvg;
+        document.getElementById('logoFooter').src = logoSvg;
+
+        // Preencher empresas
+        const selEmpresa = document.getElementById('empresaSelecionada');
+        EMPRESAS.forEach(emp => {
+            const opt = document.createElement('option');
+            opt.value = emp.nome;
+            opt.textContent = emp.nome;
+            selEmpresa.appendChild(opt);
+        });
+
+        // Preencher funcionários
+        function atualizarFuncionarios() {
+            const empresa = document.getElementById('empresaSelecionada').value;
+            const selFunc = document.getElementById('funcionarioSelecionado');
+            selFunc.innerHTML = '<option value="">-- Selecione um funcionário --</option>';
+            
+            const funcionariosFiltrados = empresa ? FUNCIONARIOS.filter(f => f.empresa === empresa) : FUNCIONARIOS;
+            
+            funcionariosFiltrados.forEach(func => {
+                const opt = document.createElement('option');
+                opt.value = func.nome;
+                opt.textContent = `${func.nome} - ${formatarMoeda(func.salario)}`;
+                opt.dataset.funcionario = JSON.stringify(func);
+                selFunc.appendChild(opt);
+            });
+        }
+
+        // Eventos
+        document.getElementById('empresaSelecionada').addEventListener('change', function() {
+            const empresa = EMPRESAS.find(e => e.nome === this.value);
+            if (empresa) {
+                document.getElementById('nomeEmpresa').value = empresa.nome;
+                document.getElementById('cnpj').value = empresa.cnpj;
+            }
+            atualizarFuncionarios();
+        });
+
+        document.getElementById('funcionarioSelecionado').addEventListener('change', function() {
+            const opt = this.options[this.selectedIndex];
+            if (opt.dataset.funcionario) {
+                const func = JSON.parse(opt.dataset.funcionario);
+                document.getElementById('nomeFuncionario').value = func.nome;
+                document.getElementById('salarioBase').value = func.salario;
+                document.getElementById('percentualPatronal').value = func.percentual_patronal;
+                
+                // Configurar descontos baseado no funcionário
+                const descontos = (func.descontos || '').toUpperCase();
+                
+                // INSS sempre ativo
+                document.getElementById('descontoINSS').checked = descontos.includes('INSS') || true;
+                
+                // Vale Transporte
+                if (descontos.includes('VALE TRANSPORTE') || descontos.includes('VT')) {
+                    document.getElementById('descontoVT').checked = true;
+                    document.getElementById('campoVT').classList.remove('hidden');
+                    document.getElementById('valorVT').value = (func.salario * 0.06).toFixed(2);
+                } else {
+                    document.getElementById('descontoVT').checked = false;
+                    document.getElementById('campoVT').classList.add('hidden');
+                }
+                
+                // Contribuição Assistencial
+                if (descontos.includes('CONTRIBUIÇÃO ASSISTENCIAL') || descontos.includes('CONTRIB')) {
+                    document.getElementById('descontoContribAssistencial').checked = true;
+                    document.getElementById('campoContribAssistencial').classList.remove('hidden');
+                } else {
+                    document.getElementById('descontoContribAssistencial').checked = false;
+                    document.getElementById('campoContribAssistencial').classList.add('hidden');
+                }
+                
+                // Consignado
+                if (descontos.includes('CONSIGNADO')) {
+                    document.getElementById('descontoConsignado').checked = true;
+                    document.getElementById('campoConsignado').classList.remove('hidden');
+                } else {
+                    document.getElementById('descontoConsignado').checked = false;
+                    document.getElementById('campoConsignado').classList.add('hidden');
+                }
+                
+                if (!document.getElementById('empresaSelecionada').value) {
+                    document.getElementById('empresaSelecionada').value = func.empresa;
+                    const empresa = EMPRESAS.find(e => e.nome === func.empresa);
+                    if (empresa) {
+                        document.getElementById('nomeEmpresa').value = empresa.nome;
+                        document.getElementById('cnpj').value = empresa.cnpj;
+                    }
+                }
+                
+                calcular();
+            }
+        });
+
+        document.getElementById('descontoVT').addEventListener('change', function() {
+            document.getElementById('campoVT').classList.toggle('hidden', !this.checked);
+            calcular();
+        });
+
+        document.getElementById('descontoContribAssistencial').addEventListener('change', function() {
+            document.getElementById('campoContribAssistencial').classList.toggle('hidden', !this.checked);
+            calcular();
+        });
+
+        document.getElementById('descontoConsignado').addEventListener('change', function() {
+            document.getElementById('campoConsignado').classList.toggle('hidden', !this.checked);
+            calcular();
+        });
+
+        // Eventos de cálculo
+        ['salarioBase', 'percentualPatronal', 'percentualFGTS', 'descontoINSS', 'valorVT', 'valorContribAssistencial', 'valorConsignado'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', calcular);
+        });
+
+        // Inicializar
+        atualizarFuncionarios();
+        calcular();
+    </script>
+</body>
+</html>

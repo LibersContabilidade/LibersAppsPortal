@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIFAL-Bot v3</title>
+
+<meta name="theme-color" content="#f5a623">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DIFAL-Bot">
+<meta name="description" content="Cálculo de DIFAL com processamento em lote de XMLs da NF-e">
+
+<!-- Apple Touch Icon -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%23f5a623' width='192' height='192' rx='24'/%3E%3Ctext x='96' y='135' font-size='120' font-weight='800' font-family='sans-serif' text-anchor='middle' fill='%23000'>D%3C/text%3E%3C/svg%3E">
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0f14;--surface:#16181f;--surface2:#1e2029;--border:#2a2d3a;
+  --accent:#f5a623;--accent2:#4ecdc4;--green:#2ecc71;--red:#e74c3c;
+  --blue:#3498db;--text:#e8eaf0;--muted:#6b7280;
+  --fh:'Syne',sans-serif;--fm:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--fm);min-height:100vh;overflow-x:hidden;padding:0 20px}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(245,166,35,.03) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(245,166,35,.03) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0}
+.wrap{max-width:1200px;width:100%;margin:0 auto;padding:40px 0;position:relative;z-index:1}
+
+header{display:flex;align-items:center;gap:14px;margin-bottom:40px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.logo{width:46px;height:46px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;font-family:var(--fh);font-weight:800;color:#000;flex-shrink:0}
+h1{font-family:var(--fh);font-size:1.9rem;font-weight:800;color:var(--accent)}
+h1 span{color:var(--text)}
+.vbadge{font-size:.52rem;padding:2px 7px;border-radius:20px;background:rgba(78,205,196,.15);color:var(--accent2);border:1px solid rgba(78,205,196,.3);font-weight:700;vertical-align:middle;margin-left:6px}
+.sub{font-size:.7rem;color:var(--muted);margin-top:2px}
+
+.upz{border:2px dashed var(--border);border-radius:12px;padding:34px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface);position:relative}
+.upz:hover,.upz.over{border-color:var(--accent);background:rgba(245,166,35,.04)}
+.upz input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upi{font-size:2.2rem;margin-bottom:8px;opacity:.6}
+.upl{font-family:var(--fh);font-size:.95rem;font-weight:700;margin-bottom:3px}
+.uph{font-size:.68rem;color:var(--muted)}
+.upf{margin-top:8px;font-size:.75rem;color:var(--accent)}
+
+.div{display:flex;align-items:center;gap:14px;margin:18px 0;color:var(--muted);font-size:.68rem}
+.div::before,.div::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:0}
+.stitle{font-family:var(--fh);font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.stitle::after{content:'';flex:1;height:1px;background:var(--border)}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.fg{display:flex;flex-direction:column;gap:4px}
+label{font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+select,input[type=text],input[type=number]{background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--fm);font-size:.8rem;padding:8px 10px;border-radius:6px;outline:none;transition:border-color .2s;width:100%}
+select:focus,input:focus{border-color:var(--accent)}
+select option{background:var(--surface2)}
+
+.isec{margin-top:20px}
+.iovf{overflow-x:auto;border:1px solid var(--border);border-radius:8px}
+table.it{width:100%;border-collapse:collapse;font-size:.75rem}
+table.it th{background:var(--surface2);color:var(--muted);font-size:.59rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:8px 9px;border-bottom:1px solid var(--border);white-space:nowrap;text-align:left}
+table.it td{padding:6px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
+table.it tr:last-child td{border:none}
+table.it input[type=text],table.it input[type=number]{background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--fm);font-size:.73rem;padding:5px 6px;border-radius:4px;min-width:60px}
+table.it select{background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--fm);font-size:.7rem;padding:4px 5px;border-radius:4px}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--border);vertical-align:middle;margin-right:4px;flex-shrink:0}
+.dot.ok{background:var(--green)}.dot.ld{background:var(--accent);animation:p .8s infinite}.dot.er{background:var(--red)}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.25}}
+.src{font-size:.56rem;padding:1px 5px;border-radius:3px;white-space:nowrap;margin-left:3px}
+.si{background:rgba(78,205,196,.1);color:var(--accent2);border:1px solid rgba(78,205,196,.25)}
+.sx{background:rgba(245,166,35,.1);color:var(--accent);border:1px solid rgba(245,166,35,.25)}
+.st{background:rgba(107,114,128,.1);color:var(--muted);border:1px solid var(--border)}
+.badd{margin-top:8px;padding:6px 13px;background:transparent;border:1px dashed var(--border);color:var(--muted);border-radius:6px;font-family:var(--fm);font-size:.72rem;cursor:pointer;transition:all .2s}
+.badd:hover{border-color:var(--accent);color:var(--accent)}
+.bdel{background:transparent;border:none;color:var(--red);cursor:pointer;font-size:.85rem;padding:2px 5px;opacity:.5;transition:opacity .2s}
+.bdel:hover{opacity:1}
+.ibst{margin-top:10px;font-size:.7rem;color:var(--muted);min-height:18px}
+
+.bgo{margin-top:18px;width:100%;padding:14px;background:var(--accent);color:#000;border:none;border-radius:8px;font-family:var(--fh);font-size:.95rem;font-weight:800;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.bgo:hover:not(:disabled){background:#e09510;transform:translateY(-1px)}
+.bgo:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;transform:none}
+.lbar{height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;animation:sl 1s infinite;margin-top:10px;display:none}
+@keyframes sl{0%{transform:scaleX(0);transform-origin:left}50%{transform:scaleX(1);transform-origin:left}51%{transform:scaleX(1);transform-origin:right}100%{transform:scaleX(0);transform-origin:right}}
+
+#rp{margin-top:26px;display:none}
+.rc{border-radius:12px;border:1px solid var(--border);overflow:hidden}
+.rh{padding:14px 20px}
+.rh.yes{background:rgba(231,76,60,.1);border-bottom:1px solid rgba(231,76,60,.2)}
+.rh.no{background:rgba(46,204,113,.08);border-bottom:1px solid rgba(46,204,113,.2)}
+.rb{font-family:var(--fh);font-size:1.1rem;font-weight:800}
+.by{color:var(--red)}.bn{color:var(--green)}
+.rbody{background:var(--surface);padding:20px}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:16px}
+.ri{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:12px}
+.ril{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.riv{font-family:var(--fh);font-size:.92rem;font-weight:700}
+.riv.hi{color:var(--accent)}
+
+.irt-ov{overflow-x:auto;border:1px solid var(--border);border-radius:8px;margin-bottom:16px}
+table.irt{width:100%;border-collapse:collapse;font-size:.73rem}
+table.irt th{background:var(--surface2);color:var(--muted);font-size:.58rem;font-weight:700;text-transform:uppercase;padding:7px 9px;border-bottom:1px solid var(--border);white-space:nowrap;text-align:left}
+table.irt td{padding:7px 9px;border-bottom:1px solid var(--border);vertical-align:middle}
+table.irt tr:last-child td{border:none}
+table.irt tfoot tr td{background:rgba(245,166,35,.06);color:var(--accent);font-weight:800;border-top:1px solid rgba(245,166,35,.25);border-bottom:none}
+
+.fsteps{border-top:1px solid var(--border);padding-top:16px}
+.fst{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.fstep{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;font-size:.76rem;animation:fi .3s ease forwards;opacity:0}
+@keyframes fi{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.sd{width:19px;height:19px;border-radius:50%;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:.56rem;font-weight:700}
+.sok{background:rgba(46,204,113,.15);color:var(--green);border:1px solid var(--green)}
+.swn{background:rgba(245,166,35,.15);color:var(--accent);border:1px solid var(--accent)}
+.sfl{background:rgba(231,76,60,.15);color:var(--red);border:1px solid var(--red)}
+.sin{background:rgba(78,205,196,.15);color:var(--accent2);border:1px solid var(--accent2)}
+
+.gbox{margin-top:16px;background:var(--surface2);border:1px solid var(--accent);border-radius:8px;padding:16px}
+.gtit{font-family:var(--fh);font-size:.82rem;font-weight:700;color:var(--accent);margin-bottom:10px}
+.gt{width:100%;border-collapse:collapse;font-size:.75rem}
+.gt td{padding:6px 10px;border-bottom:1px solid var(--border)}
+.gt td:first-child{color:var(--muted);width:55%}
+.gt td:last-child{font-weight:600;text-align:right}
+.gt tr:last-child td{border:none}
+.gt .tot td{color:var(--accent);font-weight:800;font-size:.9rem}
+
+.breset{margin-top:12px;padding:8px 18px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;font-family:var(--fm);font-size:.75rem;cursor:pointer;transition:all .2s}
+.breset:hover{border-color:var(--text);color:var(--text)}
+
+.error-msg{background:rgba(231,76,60,.1);border:1px solid var(--red);color:var(--red);padding:10px 14px;border-radius:6px;font-size:.75rem;margin-top:10px;display:none}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:2px solid var(--border)}
+.tab{padding:12px 24px;background:transparent;border:none;color:var(--muted);font-family:var(--fh);font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;border-bottom:2px solid transparent;margin-bottom:-2px}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-content{display:none}
+.tab-content.active{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* BATCH PROCESSING */
+.batch-upz{border:2px dashed var(--border);border-radius:12px;padding:40px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface);position:relative;margin-bottom:20px}
+.batch-upz:hover,.batch-upz.over{border-color:var(--accent);background:rgba(245,166,35,.04)}
+.batch-upz input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.batch-files{margin-top:16px;display:grid;gap:8px}
+.batch-file-item{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;font-size:.75rem}
+.batch-file-name{color:var(--text);flex:1}
+.batch-file-status{font-size:.65rem;padding:2px 8px;border-radius:12px;margin-left:10px}
+.batch-file-status.pending{background:rgba(107,114,128,.15);color:var(--muted)}
+.batch-file-status.processing{background:rgba(245,166,35,.15);color:var(--accent);animation:pulse 1.5s ease-in-out infinite}
+.batch-file-status.success{background:rgba(46,204,113,.15);color:var(--green)}
+.batch-file-status.error{background:rgba(231,76,60,.15);color:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.batch-file-remove{background:transparent;border:none;color:var(--red);cursor:pointer;font-size:.9rem;opacity:.5;margin-left:10px;padding:2px 6px}
+.batch-file-remove:hover{opacity:1}
+.batch-summary{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;margin:20px 0}
+.batch-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:12px}
+.batch-summary-item{text-align:center}
+.batch-summary-value{font-family:var(--fh);font-size:1.5rem;font-weight:800;margin-bottom:4px}
+.batch-summary-value.total{color:var(--accent)}
+.batch-summary-value.success{color:var(--green)}
+.batch-summary-label{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.batch-result-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px}
+.batch-result-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.batch-result-title{font-family:var(--fh);font-size:.9rem;font-weight:700;color:var(--text)}
+.batch-result-badge{font-size:.65rem;padding:3px 10px;border-radius:12px;font-weight:700}
+.batch-result-badge.yes{background:rgba(231,76,60,.15);color:var(--red)}
+.batch-result-badge.no{background:rgba(46,204,113,.15);color:var(--green)}
+.batch-result-info{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;font-size:.72rem;margin-top:10px}
+.batch-result-info-item{background:var(--surface2);padding:8px 10px;border-radius:4px}
+.batch-result-info-label{color:var(--muted);font-size:.6rem;text-transform:uppercase;margin-bottom:2px}
+.batch-result-info-value{color:var(--text);font-weight:600}
+.batch-result-info-value.highlight{color:var(--accent);font-weight:700;font-size:.85rem}
+
+@media(max-width:640px){.fg2{grid-template-columns:1fr}.rgrid{grid-template-columns:1fr}h1{font-size:1.5rem}.tabs{overflow-x:auto}.batch-summary-grid,.batch-result-info{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="logo">D</div>
+  <div>
+    <h1>DIFAL<span>-Bot</span><span class="vbadge">v3</span></h1>
+    <div class="sub">Cálculo item a item — alíquota por NCM via API IBPT em tempo real</div>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" id="tab-btn-single">📄 Cálculo Único</button>
+  <button class="tab" id="tab-btn-batch">📦 Processamento em Lote</button>
+</div>
+
+<div id="tab-single" class="tab-content active">
+
+<div class="upz" id="upz">
+  <input type="file" accept=".xml" id="xml-file">
+  <div class="upi">📄</div>
+  <div class="upl">Upload do XML da NF-e</div>
+  <div class="uph">Detecta todos os itens automaticamente e consulta o NCM de cada um na IBPT</div>
+  <div class="upf" id="upf"></div>
+</div>
+
+<div class="div">ou preencha manualmente</div>
+
+<div class="card">
+  <div class="stitle">Dados da Operação</div>
+  <div class="fg2">
+    <div class="fg">
+      <label>UF Emitente (Origem)</label>
+      <select id="uf-orig">
+        <option value="">Selecione...</option>
+        <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option>
+        <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
+        <option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option>
+        <option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+        <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+        <option selected>SP</option><option>SE</option><option>TO</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>UF Destinatário (Destino)</label>
+      <select id="uf-dest">
+        <option value="">Selecione...</option>
+        <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option>
+        <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
+        <option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option>
+        <option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+        <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+        <option>SP</option><option>SE</option><option>TO</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Regime do Emitente</label>
+      <select id="regime">
+        <option value="simples">Simples Nacional</option>
+        <option value="normal">Regime Normal (Lucro Real/Presumido)</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Natureza da Operação</label>
+      <select id="natureza">
+        <option value="venda_consumidor">Venda para Consumidor Final</option>
+        <option value="venda_revendedor">Venda para Revendedor / Contribuinte</option>
+        <option value="transferencia">Transferência</option>
+        <option value="remessa">Remessa / Outros</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Destinatário é Consumidor Final?</label>
+      <select id="cons-final"><option value="sim">Sim</option><option value="nao">Não</option></select>
+    </div>
+    <div class="fg">
+      <label>Destinatário Contribuinte de ICMS?</label>
+      <select id="contrib"><option value="nao">Não (não-contribuinte)</option><option value="sim">Sim (contribuinte)</option></select>
+    </div>
+    <div class="fg">
+      <label>Data de Emissão</label>
+      <input type="text" id="dt-emis" placeholder="DD/MM/AAAA">
+    </div>
+    <div class="fg">
+      <label>Valor Total da Nota (R$)</label>
+      <input type="number" id="vnf" placeholder="0,00" step="0.01" min="0">
+    </div>
+  </div>
+
+  <div class="isec">
+    <div class="stitle" style="margin-top:18px">
+      Itens da Nota
+      <span style="color:var(--accent2);font-size:.6rem;font-weight:400;letter-spacing:0;text-transform:none">— alíquota consultada por NCM na API IBPT (campo editável)</span>
+    </div>
+    <div class="iovf">
+      <table class="it">
+        <thead><tr>
+          <th>#</th><th>Descrição</th><th>NCM</th><th>CFOP</th>
+          <th>Base Cálc. (R$)</th>
+          <th>Alíq. Interna % <span style="font-weight:400;opacity:.6">(IBPT/XML/tabela)</span></th>
+          <th>Fonte</th><th>Origem</th><th>Tem ST?</th><th></th>
+        </tr></thead>
+        <tbody id="itb"></tbody>
+      </table>
+    </div>
+    <button class="badd" id="btn-add">+ Adicionar item</button>
+    <div class="ibst" id="ibst"></div>
+    <div class="error-msg" id="error-msg"></div>
+  </div>
+
+  <div class="lbar" id="lbar"></div>
+  <button class="bgo" id="bgo">⚡ Calcular DIFAL</button>
+</div>
+
+<div id="rp">
+  <div class="rc">
+    <div class="rh" id="rh"><div class="rb" id="rbadge"></div><div style="font-size:.73rem;color:var(--muted);margin-top:2px" id="rdesc"></div></div>
+    <div class="rbody">
+      <div class="rgrid" id="rgrid"></div>
+      <div class="stitle">Detalhamento por Item</div>
+      <div class="irt-ov"><table class="irt" id="irt"></table></div>
+      <div class="fsteps"><div class="fst">Rastreio do Fluxograma</div><div id="fss"></div></div>
+      <div id="gbox"></div>
+    </div>
+  </div>
+  <button class="breset" id="btn-reset">↩ Nova análise</button>
+</div>
+
+</div>
+
+<script>
+'use strict';
+
+// Configurações
+const CONFIG = {
+  ALIQ_INT: {
+    AC:17,AL:17,AP:18,AM:18,BA:18,CE:18,DF:18,ES:17,
+    GO:17,MA:20,MT:17,MS:17,MG:18,PA:17,PB:18,PR:18,
+    PE:18,PI:21,RJ:20,RN:20,RS:17,RO:17,RR:17,SC:17,
+    SP:18,SE:17,TO:18
+  },
+  FCP_STATES: ['AL','BA','CE','MA','PA','PB','PE','PI','RN','SE','RJ','MT','GO'],
+  SUL_SUDESTE: new Set(['SP','RJ','MG','ES','RS','SC','PR','MS']),
+  ST_EXEMPTION_STATES: ['MG','RS','SC','PR'],
+  IMPORTED_ORIGINS: ['2','3','6','7']
+};
+
+// Utilitários
+const Utils = {
+  fmt(value) {
+    return (+value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  },
+  
+  parseBR(value) {
+    return parseFloat((value || '').replace(',', '.')) || 0;
+  },
+  
+  pad(num) {
+    return String(num).padStart(2, '0');
+  },
+  
+  esc(str) {
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return (str || '').replace(/[&<>"']/g, m => map[m]);
+  },
+  
+  showError(msg) {
+    const el = document.getElementById('error-msg');
+    if (el) {
+      el.textContent = msg;
+      el.style.display = 'block';
+      setTimeout(() => el.style.display = 'none', 5000);
+    }
+    console.error('❌ Erro:', msg);
+  }
+};
+
+// Cálculo de alíquota interestadual
+function getAliqInter(ufO, ufD, imported) {
+  if (imported) return 4;
+  if (CONFIG.SUL_SUDESTE.has(ufO) && CONFIG.SUL_SUDESTE.has(ufD)) return 12;
+  if (CONFIG.SUL_SUDESTE.has(ufO) && !CONFIG.SUL_SUDESTE.has(ufD)) return 7;
+  return 12;
+}
+
+// Cache IBPT
+const cache = {};
+
+async function ibpt(ncm, uf) {
+  const k = ncm.replace(/\D/g, '') + '_' + uf;
+  if (cache[k]) return cache[k];
+  
+  const fallback = { aliq: CONFIG.ALIQ_INT[uf] || 18, desc: 'Padrão ' + uf, ok: false };
+  
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 200,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{
+          role: 'user',
+          content: `Acesse esta URL e retorne APENAS JSON sem texto: https://api-ibpt.seunegocionanuvem.com.br/api_ibpt.php?codigo=${ncm.replace(/\D/g, '')}&uf=${uf} Formato: {"aliq":NUMERO,"desc":"TEXTO"} onde aliq=campo estadual. Se estadual=0 use ${CONFIG.ALIQ_INT[uf] || 18}.`
+        }]
+      })
+    });
+    
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    
+    const data = await resp.json();
+    const txt = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+    const jm = txt.match(/\{[\s\S]*?\}/);
+    if (!jm) throw new Error('sem JSON');
+    
+    const p = JSON.parse(jm[0]);
+    const result = {
+      aliq: parseFloat(p.aliq) || (CONFIG.ALIQ_INT[uf] || 18),
+      desc: p.desc || '',
+      ok: true
+    };
+    
+    cache[k] = result;
+    return result;
+  } catch (e) {
+    console.warn('Erro IBPT:', e);
+    cache[k] = fallback;
+    return fallback;
+  }
+}
+
+// Gerenciamento de itens
+let itemCounter = 0;
+
+function addItem(data = {}) {
+  const id = 'i' + (++itemCounter);
+  const tr = document.createElement('tr');
+  tr.id = id;
+  
+  tr.innerHTML = `
+    <td style="color:var(--muted);font-size:.65rem">${itemCounter}</td>
+    <td><input type="text" class="desc" placeholder="Descrição do produto" style="min-width:130px" value="${Utils.esc(data.desc || '')}"></td>
+    <td><input type="text" class="ncm" placeholder="00000000" maxlength="10" style="width:90px" value="${Utils.esc(data.ncm || '')}"></td>
+    <td><input type="text" class="cfop" placeholder="0000" maxlength="4" style="width:60px" value="${Utils.esc(data.cfop || '')}"></td>
+    <td><input type="number" class="base" placeholder="0.00" step="0.01" min="0" style="width:90px" value="${data.base || ''}"></td>
+    <td style="white-space:nowrap">
+      <span class="dot" id="dt_${id}"></span>
+      <input type="number" class="aliq" id="aliq_${id}" placeholder="--" step="0.01" min="0" max="100" style="width:56px;display:inline-block" value="${data.aliq || ''}">
+      <span class="src st" id="src_${id}">—</span>
+    </td>
+    <td style="font-size:.65rem;color:var(--muted)" id="fonte_${id}">Auto</td>
+    <td>
+      <select class="origem" id="orig_${id}">
+        <option value="nac" ${!data.importado ? 'selected' : ''}>🇧🇷 Nacional</option>
+        <option value="imp" ${data.importado ? 'selected' : ''}>🌍 Importado</option>
+      </select>
+    </td>
+    <td><select class="tem-st"><option value="nao">Não</option><option value="sim"${data.st === 'sim' ? ' selected' : ''}>Sim</option></select></td>
+    <td><button class="bdel" onclick="delItem('${id}')">✕</button></td>`;
+  
+  document.getElementById('itb').appendChild(tr);
+  
+  const ncmInput = tr.querySelector('.ncm');
+  ncmInput.addEventListener('blur', () => consultItem(id));
+  
+  if (data.ncm) {
+    consultItem(id);
+  } else {
+    const dot = document.getElementById('dt_' + id);
+    if (dot) dot.className = 'dot';
+  }
+  
+  return id;
+}
+
+function delItem(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+async function consultItem(id) {
+  const tr = document.getElementById(id);
+  if (!tr) return;
+  
+  const ncm = tr.querySelector('.ncm').value.trim();
+  const uf = document.getElementById('uf-dest').value;
+  const dot = document.getElementById('dt_' + id);
+  const aliqInput = document.getElementById('aliq_' + id);
+  const srcLabel = document.getElementById('src_' + id);
+  
+  if (!ncm || !uf) {
+    if (dot) dot.className = 'dot';
+    return;
+  }
+  
+  if (dot) dot.className = 'dot ld';
+  updateStatus('🔍 Consultando IBPT para NCM ' + ncm + '...', '#f5a623');
+  
+  const r = await ibpt(ncm, uf);
+  
+  if (dot) dot.className = r.ok ? 'dot ok' : 'dot er';
+  if (aliqInput) aliqInput.value = r.aliq.toFixed(2);
+  
+  if (srcLabel) {
+    if (r.ok) {
+      srcLabel.className = 'src si';
+      srcLabel.textContent = 'IBPT';
+      if (aliqInput) {
+        aliqInput.style.borderColor = 'var(--accent2)';
+        aliqInput.style.color = 'var(--accent2)';
+      }
+    } else {
+      srcLabel.className = 'src st';
+      srcLabel.textContent = 'Tabela';
+      if (aliqInput) {
+        aliqInput.style.borderColor = '';
+        aliqInput.style.color = '';
+      }
+    }
+  }
+  
+  const loading = document.querySelectorAll('.dot.ld');
+  if (loading.length === 0) {
+    updateStatus('✓ Consultas IBPT concluídas', '#2ecc71');
+  }
+}
+
+function updateStatus(msg, color) {
+  const el = document.getElementById('ibst');
+  if (el) {
+    el.textContent = msg;
+    el.style.color = color || 'var(--muted)';
+  }
+}
+
+function reloadAll() {
+  document.querySelectorAll('#itb tr').forEach(tr => {
+    if (tr.id) consultItem(tr.id);
+  });
+}
+
+function getItems() {
+  return Array.from(document.querySelectorAll('#itb tr')).map(tr => {
+    if (!tr.id) return null;
+    return {
+      id: tr.id,
+      desc: tr.querySelector('.desc')?.value || '',
+      ncm: tr.querySelector('.ncm')?.value || '',
+      cfop: tr.querySelector('.cfop')?.value || '',
+      base: Utils.parseBR(tr.querySelector('.base')?.value),
+      aliq: Utils.parseBR(tr.querySelector('.aliq')?.value),
+      st: tr.querySelector('.tem-st')?.value || 'nao',
+      fonte: document.getElementById('src_' + tr.id)?.textContent || '—',
+      importado: document.getElementById('orig_' + tr.id)?.value === 'imp'
+    };
+  }).filter(item => item && item.base > 0);
+}
+
+// Parser XML
+function gT(node, tag) {
+  const el = node.getElementsByTagName(tag)[0];
+  return el ? el.textContent.trim() : '';
+}
+
+function setSel(id, val) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  for (const opt of sel.options) {
+    if (opt.value === val || opt.text === val) {
+      sel.value = opt.value;
+      return;
+    }
+  }
+}
+
+function handleXML(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  
+  document.getElementById('upf').textContent = '📎 ' + f.name;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      parseXML(new DOMParser().parseFromString(ev.target.result, 'text/xml'));
+    } catch (err) {
+      console.error('Erro XML:', err);
+      Utils.showError('Erro ao processar XML: ' + err.message);
+    }
+  };
+  r.readAsText(f, 'UTF-8');
+}
+
+function parseXML(xml) {
+  try {
+    const emit = xml.getElementsByTagName('emit')[0];
+    const dest = xml.getElementsByTagName('dest')[0];
+    
+    if (emit) setSel('uf-orig', gT(emit, 'UF'));
+    if (dest) setSel('uf-dest', gT(dest, 'UF'));
+    
+    const indF = gT(xml, 'indFinal');
+    const indIE = gT(xml, 'indIEDest');
+    const crt = gT(xml, 'CRT');
+    const vNF = gT(xml, 'vNF');
+    const dhEmi = gT(xml, 'dhEmi');
+    const natOp = gT(xml, 'natOp').toLowerCase();
+    
+    if (indF === '1') setSel('cons-final', 'sim');
+    else if (indF === '0') setSel('cons-final', 'nao');
+    
+    if (indIE === '9') setSel('contrib', 'nao');
+    else if (['1', '2'].includes(indIE)) setSel('contrib', 'sim');
+    
+    if (crt === '1') setSel('regime', 'simples');
+    
+    if (vNF) document.getElementById('vnf').value = parseFloat(vNF).toFixed(2);
+    
+    if (natOp.includes('transfer')) setSel('natureza', 'transferencia');
+    else if (natOp.includes('remessa')) setSel('natureza', 'remessa');
+    
+    if (dhEmi) {
+      const d = new Date(dhEmi);
+      if (!isNaN(d)) {
+        document.getElementById('dt-emis').value = 
+          Utils.pad(d.getDate()) + '/' + Utils.pad(d.getMonth() + 1) + '/' + d.getFullYear();
+      }
+    }
+    
+    document.getElementById('itb').innerHTML = '';
+    itemCounter = 0;
+    
+    const dets = xml.getElementsByTagName('det');
+    if (dets.length === 0) {
+      addItem();
+      return;
+    }
+    
+    for (const det of dets) {
+      const prod = det.getElementsByTagName('prod')[0];
+      const icms = det.getElementsByTagName('ICMS')[0];
+      const desc = prod ? gT(prod, 'xProd') : '';
+      const ncm = prod ? gT(prod, 'NCM') : '';
+      const cfop = prod ? gT(prod, 'CFOP') : '';
+      
+      let base = '';
+      const icd = det.getElementsByTagName('ICMSDest')[0];
+      if (icd) base = gT(icd, 'vBCDest') || gT(icd, 'vBC');
+      if (!base && icms) base = gT(icms, 'vBC');
+      if (!base && prod) base = gT(prod, 'vProd');
+      
+      let aliqXML = '';
+      if (icd) aliqXML = gT(icd, 'pICMSDest') || gT(icd, 'pICMS');
+      if (!aliqXML && icms) aliqXML = gT(icms, 'pICMS');
+      
+      const origProd = prod ? gT(prod, 'orig') : '0';
+      const importado = CONFIG.IMPORTED_ORIGINS.includes(origProd);
+      
+      const csosn = gT(icms || det, 'CSOSN') || gT(icms || det, 'CST') || '';
+      const vST = gT(det, 'vICMSST');
+      const hasST = (vST !== '' && vST !== '0') || csosn === '010' || csosn === '060' ? 'sim' : 'nao';
+      
+      const itemId = addItem({
+        desc,
+        ncm,
+        cfop,
+        base: base ? parseFloat(base).toFixed(2) : '',
+        aliq: aliqXML ? parseFloat(aliqXML).toFixed(2) : '',
+        st: hasST,
+        importado
+      });
+      
+      if (aliqXML && itemId) {
+        const src = document.getElementById('src_' + itemId);
+        if (src) {
+          src.className = 'src sx';
+          src.textContent = 'XML';
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Erro parseXML:', err);
+    Utils.showError('Erro ao processar XML: ' + err.message);
+  }
+}
+
+// Cálculo DIFAL
+async function calcular() {
+  console.log('🚀 Iniciando cálculo...');
+  
+  try {
+    const ufO = document.getElementById('uf-orig').value;
+    const ufD = document.getElementById('uf-dest').value;
+    const reg = document.getElementById('regime').value;
+    const nat = document.getElementById('natureza').value;
+    const cf = document.getElementById('cons-final').value;
+    const con = document.getElementById('contrib').value;
+    const dt = document.getElementById('dt-emis').value || 'Não informada';
+    const itens = getItems();
+    
+    console.log('📋 Dados:', { ufO, ufD, reg, nat, cf, con, dt, itens });
+    
+    if (!ufO || !ufD) {
+      Utils.showError('Informe UF de origem e destino.');
+      return;
+    }
+    
+    if (itens.length === 0) {
+      Utils.showError('Adicione ao menos um item com base de cálculo.');
+      return;
+    }
+    
+    const lb = document.getElementById('lbar');
+    const btn = document.getElementById('bgo');
+    
+    if (lb) lb.style.display = 'block';
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Consultando IBPT...';
+    }
+    
+    updateStatus('🔍 Buscando alíquotas na IBPT...', '#f5a623');
+    
+    await Promise.all(itens.map(item => item.ncm ? ibpt(item.ncm, ufD) : Promise.resolve()));
+    
+    for (const item of itens) {
+      if (item.ncm) {
+        const r = await ibpt(item.ncm, ufD);
+        if (r.ok) {
+          item.aliq = r.aliq;
+          item.fonte = 'IBPT';
+          item.descIB = r.desc;
+        } else {
+          item.fonte = item.fonte === 'XML' ? 'XML (pICMS)' : (item.aliq > 0 ? 'Manual' : 'Tabela');
+          if (!item.aliq) item.aliq = CONFIG.ALIQ_INT[ufD] || 18;
+        }
+      } else {
+        item.fonte = item.aliq > 0 ? 'Manual' : 'Tabela';
+        if (!item.aliq) item.aliq = CONFIG.ALIQ_INT[ufD] || 18;
+      }
+    }
+    
+    if (lb) lb.style.display = 'none';
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '⚡ Calcular DIFAL';
+    }
+    
+    updateStatus('✓ Alíquotas atualizadas', '#2ecc71');
+    
+    const res = calcDifal({ ufO, ufD, reg, nat, cf, con, dt, itens });
+    console.log('✅ Resultado:', res);
+    
+    showResult(res);
+  } catch (err) {
+    console.error('❌ Erro no cálculo:', err);
+    Utils.showError('Erro ao calcular: ' + err.message);
+    
+    const lb = document.getElementById('lbar');
+    const btn = document.getElementById('bgo');
+    if (lb) lb.style.display = 'none';
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '⚡ Calcular DIFAL';
+    }
+  }
+}
+
+function calcDifal(p) {
+  const steps = [];
+  const aI = getAliqInter(p.ufO, p.ufD, false);
+  
+  if (p.ufO === p.ufD) {
+    steps.push({ t: 'fl', m: `INTRAESTADUAL (${p.ufO}=${p.ufD}) — DIFAL não se aplica.` });
+    return { ok: false, steps, mot: 'Operação intraestadual', p };
+  }
+  
+  steps.push({ t: 'ok', m: `INTERESTADUAL: ${p.ufO} → ${p.ufD} | Alíquota interestadual base: ${aI}%` });
+  
+  if (p.nat === 'transferencia' || p.nat === 'remessa') {
+    steps.push({ t: 'fl', m: 'Transferência/Remessa — DIFAL não incide.' });
+    return { ok: false, steps, mot: 'Natureza não gera DIFAL', p };
+  }
+  
+  steps.push({ t: 'ok', m: `Natureza: ${p.nat}` });
+  
+  if (p.cf === 'nao') {
+    steps.push({ t: 'fl', m: 'Destinatário NÃO é consumidor final — sem DIFAL.' });
+    return { ok: false, steps, mot: 'Destinatário não é consumidor final', p };
+  }
+  
+  steps.push({ t: 'ok', m: 'Destinatário: CONSUMIDOR FINAL ✓' });
+  
+  steps.push({
+    t: p.con === 'sim' ? 'wn' : 'ok',
+    m: p.con === 'sim' ? 'Destinatário CONTRIBUINTE de ICMS — DIFAL se aplica.' : 'Destinatário NÃO-CONTRIBUINTE — DIFAL se aplica.'
+  });
+  
+  steps.push({
+    t: p.reg === 'simples' ? 'wn' : 'in',
+    m: p.reg === 'simples' ? 'SIMPLES NACIONAL: obrigado ao DIFAL desde 2022.' : 'Regime Normal — DIFAL padrão.'
+  });
+  
+  steps.push({ t: 'in', m: `Calculando ${p.itens.length} item(s)...` });
+  
+  const rows = [];
+  let totD = 0, totF = 0, totB = 0;
+  
+  for (const item of p.itens) {
+    const aliqInt = item.aliq;
+    const base = item.base;
+    
+    // PRIORITY: Use interstate aliquot from XML if available
+    const aI_item = item.aliqInterXML !== null && item.aliqInterXML !== undefined 
+      ? item.aliqInterXML 
+      : getAliqInter(p.ufO, p.ufD, item.importado);
+    
+    const origemLabel = item.importado ? '🌍 Importado' : '🇧🇷 Nacional';
+    const aliqSource = item.aliqInterXML !== null ? '(XML)' : '(Calculado)';
+    
+    // VERIFICAÇÃO: CFOP 6404, 6402, 6403 com ST não incide DIFAL
+    const cfopsIsentos = ['6404', '6402', '6403'];
+    if (cfopsIsentos.includes(item.cfop) && item.st === 'sim') {
+      rows.push({ ...item, aI: aI_item, disp: true, vD: 0, vF: 0, mot: `CFOP ${item.cfop} c/ ST isento`, origemLabel });
+      steps.push({ t: 'wn', m: `CFOP ${item.cfop} com ST: DIFAL não incide (item não somado ao total).` });
+      continue;
+    }
+    
+    if (item.st === 'sim' && CONFIG.ST_EXEMPTION_STATES.includes(p.ufD)) {
+      rows.push({ ...item, aI: aI_item, disp: true, vD: 0, vF: 0, mot: 'Dispensa ST', origemLabel });
+      steps.push({ t: 'wn', m: `NCM ${item.ncm || '—'}: ST + ${p.ufD} dispensa DIFAL.` });
+      continue;
+    }
+    
+    if (aI_item >= aliqInt) {
+      rows.push({ ...item, aI: aI_item, disp: true, vD: 0, vF: 0, mot: `Inter ${aI_item}% ≥ Int ${aliqInt}%`, origemLabel });
+      steps.push({ t: 'wn', m: `NCM ${item.ncm || '—'}: inter ${aI_item}% ${aliqSource} ≥ interna ${aliqInt}% — DIFAL zero.` });
+      continue;
+    }
+    
+    const pct = (aliqInt - aI_item) / 100;
+    const vD = +(base * pct).toFixed(2);
+    const vF = CONFIG.FCP_STATES.includes(p.ufD) ? +(base * 0.02).toFixed(2) : 0;
+    
+    totD += vD;
+    totF += vF;
+    totB += base;
+    
+    rows.push({ ...item, aI: aI_item, aliqInt, pct: pct * 100, vD, vF, disp: false, origemLabel });
+    steps.push({
+      t: 'ok',
+      m: `NCM ${item.ncm || '—'} | ${origemLabel} | Inter: ${aI_item}% ${aliqSource} | Int: ${aliqInt}% | DIFAL: R$${Utils.fmt(vD)}`
+    });
+  }
+  
+  const totG = +(totD + totF).toFixed(2);
+  
+  if (!totG) {
+    steps.push({ t: 'fl', m: 'Nenhum item gerou DIFAL.' });
+    return { ok: false, steps, mot: 'DIFAL zero', p, rows, aI };
+  }
+  
+  steps.push({ t: 'ok', m: `TOTAL: R$${Utils.fmt(totD)}${totF > 0 ? ` + FCP R$${Utils.fmt(totF)}` : ''} = R$${Utils.fmt(totG)}` });
+  
+  return { ok: true, steps, p, rows, aI, totD, totF, totG, totB };
+}
+
+// Exibir resultado
+function showResult(r) {
+  console.log('📊 Exibindo resultado:', r);
+  
+  const rp = document.getElementById('rp');
+  const rh = document.getElementById('rh');
+  const rbg = document.getElementById('rbadge');
+  const rdc = document.getElementById('rdesc');
+  const rg = document.getElementById('rgrid');
+  const fss = document.getElementById('fss');
+  const gb = document.getElementById('gbox');
+  const irt = document.getElementById('irt');
+  
+  if (rg) rg.innerHTML = '';
+  if (fss) fss.innerHTML = '';
+  if (gb) gb.innerHTML = '';
+  if (irt) irt.innerHTML = '';
+  if (rh) rh.className = 'rh';
+  
+  if (r.ok) {
+    if (rh) rh.classList.add('yes');
+    if (rbg) rbg.innerHTML = '<span class="by">⚠ DIFAL INCIDE — Recolhimento obrigatório</span>';
+    if (rdc) rdc.textContent = `${r.p.ufO} → ${r.p.ufD} | ${r.rows.filter(i => !i.disp).length} item(s) com DIFAL`;
+    
+    if (rg) {
+      rg.innerHTML = `
+        <div class="ri"><div class="ril">Alíq. Interestadual</div><div class="riv">${r.aI}%</div></div>
+        <div class="ri"><div class="ril">Base Total</div><div class="riv">R$ ${Utils.fmt(r.totB)}</div></div>
+        <div class="ri"><div class="ril">DIFAL Total</div><div class="riv hi">R$ ${Utils.fmt(r.totD)}</div></div>
+        <div class="ri"><div class="ril">Total a Recolher</div><div class="riv hi">R$ ${Utils.fmt(r.totG)}</div></div>`;
+    }
+    
+    if (irt) {
+      const th = `<thead><tr>
+        <th>Descrição</th><th>NCM</th><th>CFOP</th><th>Fonte</th><th>Origem</th>
+        <th>Base (R$)</th><th>Alíq. Inter.</th><th>Alíq. Int.</th>
+        <th>Dif.</th><th>DIFAL (R$)</th><th>FCP (R$)</th><th>Status</th>
+      </tr></thead>`;
+      
+      const ft = `<tfoot><tr>
+        <td colspan="8" style="text-align:right">TOTAL</td>
+        <td>R$ ${Utils.fmt(r.totD)}</td><td>${r.totF > 0 ? 'R$ ' + Utils.fmt(r.totF) : '—'}</td>
+        <td>= R$ ${Utils.fmt(r.totG)}</td>
+      </tr></tfoot>`;
+      
+      const tbody = document.createElement('tbody');
+      r.rows.forEach(item => {
+        const tr = document.createElement('tr');
+        if (item.disp) {
+          tr.innerHTML = `
+            <td>${item.desc || '—'}</td><td>${item.ncm || '—'}</td>
+            <td style="font-weight:600">${item.cfop || '—'}</td>
+            <td><span class="src st">${item.fonte || '—'}</span></td>
+            <td style="font-size:.68rem">${item.origemLabel}</td>
+            <td>R$ ${Utils.fmt(item.base)}</td>
+            <td>—</td><td>—</td><td>—</td>
+            <td>R$ 0,00</td><td>—</td>
+            <td style="color:var(--muted);font-size:.62rem">${item.mot}</td>`;
+        } else {
+          const sc = item.fonte === 'IBPT' ? 'si' : item.fonte.includes('XML') ? 'sx' : 'st';
+          tr.innerHTML = `
+            <td>${item.desc || '—'}</td><td>${item.ncm || '—'}</td>
+            <td style="font-weight:600">${item.cfop || '—'}</td>
+            <td><span class="src ${sc}">${item.fonte}</span></td>
+            <td style="font-size:.68rem">${item.origemLabel}</td>
+            <td>R$ ${Utils.fmt(item.base)}</td>
+            <td>${item.aI}%</td>
+            <td style="color:var(--accent2)">${item.aliqInt.toFixed(2)}%</td>
+            <td style="color:var(--accent)">${item.pct.toFixed(2)}%</td>
+            <td style="color:var(--accent);font-weight:700">R$ ${Utils.fmt(item.vD)}</td>
+            <td>${item.vF > 0 ? 'R$ ' + Utils.fmt(item.vF) : '—'}</td>
+            <td style="color:var(--green);font-size:.68rem">✓ Calc.</td>`;
+        }
+        tbody.appendChild(tr);
+      });
+      
+      irt.innerHTML = th + ft;
+      irt.appendChild(tbody);
+    }
+    
+    if (gb) {
+      gb.innerHTML = `<div class="gbox">
+        <div class="gtit">📋 Dados da Guia DIFAL</div>
+        <table class="gt">
+          <tr><td>Data de Emissão</td><td>${r.p.dt}</td></tr>
+          <tr><td>UF Origem</td><td>${r.p.ufO}</td></tr>
+          <tr><td>UF Destino</td><td>${r.p.ufD}</td></tr>
+          <tr><td>Itens com DIFAL</td><td>${r.rows.filter(i => !i.disp).length} de ${r.rows.length}</td></tr>
+          <tr><td>Base Total</td><td>R$ ${Utils.fmt(r.totB)}</td></tr>
+          <tr><td>DIFAL</td><td>R$ ${Utils.fmt(r.totD)}</td></tr>
+          ${r.totF > 0 ? `<tr><td>FCP</td><td>R$ ${Utils.fmt(r.totF)}</td></tr>` : ''}
+          <tr class="tot"><td><b>TOTAL</b></td><td><b>R$ ${Utils.fmt(r.totG)}</b></td></tr>
+        </table>
+      </div>`;
+    }
+  } else {
+    if (rh) rh.classList.add('no');
+    if (rbg) rbg.innerHTML = '<span class="bn">✓ SEM DIFAL — Não há recolhimento</span>';
+    if (rdc) rdc.textContent = r.mot;
+  }
+  
+  if (fss) {
+    r.steps.forEach((s, i) => {
+      const div = document.createElement('div');
+      div.className = 'fstep';
+      div.style.animationDelay = (i * 0.07) + 's';
+      const cls = { ok: 'sok', wn: 'swn', fl: 'sfl', in: 'sin' }[s.t] || 'sin';
+      div.innerHTML = `<div class="sd ${cls}">${i + 1}</div><div>${s.m}</div>`;
+      fss.appendChild(div);
+    });
+  }
+  
+  if (rp) {
+    rp.style.display = 'block';
+    rp.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function reset() {
+  const rp = document.getElementById('rp');
+  const upf = document.getElementById('upf');
+  if (rp) rp.style.display = 'none';
+  if (upf) upf.textContent = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Drag & drop
+function setupDragDrop() {
+  const z = document.getElementById('upz');
+  if (!z) return;
+  
+  z.addEventListener('dragover', e => {
+    e.preventDefault();
+    z.classList.add('over');
+  });
+  
+  z.addEventListener('dragleave', () => z.classList.remove('over'));
+  
+  z.addEventListener('drop', e => {
+    e.preventDefault();
+    z.classList.remove('over');
+    const f = e.dataTransfer.files[0];
+    if (f?.name.endsWith('.xml')) {
+      document.getElementById('upf').textContent = '📎 ' + f.name;
+      const r = new FileReader();
+      r.onload = ev => {
+        try {
+          parseXML(new DOMParser().parseFromString(ev.target.result, 'text/xml'));
+        } catch (err) {
+          console.error('Erro XML:', err);
+          Utils.showError('Erro: ' + err.message);
+        }
+      };
+      r.readAsText(f, 'UTF-8');
+    }
+  });
+}
+
+// Inicialização
+(function init() {
+  addItem();
+  
+  const today = new Date();
+  const dtInput = document.getElementById('dt-emis');
+  if (dtInput) {
+    dtInput.value = Utils.pad(today.getDate()) + '/' + Utils.pad(today.getMonth() + 1) + '/' + today.getFullYear();
+  }
+  
+  const xmlInput = document.getElementById('xml-file');
+  if (xmlInput) xmlInput.addEventListener('change', handleXML);
+  
+  const addBtn = document.getElementById('btn-add');
+  if (addBtn) addBtn.addEventListener('click', () => addItem());
+  
+  const calcBtn = document.getElementById('bgo');
+  if (calcBtn) calcBtn.addEventListener('click', calcular);
+  
+  const resetBtn = document.getElementById('btn-reset');
+  if (resetBtn) resetBtn.addEventListener('click', reset);
+  
+  const ufOrig = document.getElementById('uf-orig');
+  const ufDest = document.getElementById('uf-dest');
+  if (ufOrig) ufOrig.addEventListener('change', reloadAll);
+  if (ufDest) ufDest.addEventListener('change', reloadAll);
+  
+  setupDragDrop();
+  
+  console.log('✅ DIFAL-Bot v3 inicializado!');
+})();
+</script>
+
+</div><!-- End tab-single -->
+
+<!-- TAB 2: BATCH PROCESSING -->
+<div id="tab-batch" class="tab-content">
+  
+  <div class="card" style="margin-bottom:20px">
+    <div class="stitle">⚙️ Configurações do Lote</div>
+    <div class="fg2">
+      <div class="fg">
+        <label>Natureza da Operação (Padrão para todos)</label>
+        <select id="batch-natureza">
+          <option value="auto">🔄 Automático (detectar do XML)</option>
+          <option value="venda_consumidor">Venda para Consumidor Final</option>
+          <option value="venda_revendedor">Venda para Revendedor / Contribuinte</option>
+          <option value="transferencia">Transferência</option>
+          <option value="remessa">Remessa / Outros</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Regime do Emitente (Padrão)</label>
+        <select id="batch-regime">
+          <option value="auto">🔄 Automático (detectar do XML)</option>
+          <option value="simples">Simples Nacional</option>
+          <option value="normal">Regime Normal (Lucro Real/Presumido)</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Destinatário é Consumidor Final?</label>
+        <select id="batch-cons-final">
+          <option value="auto">🔄 Automático (detectar do XML)</option>
+          <option value="sim">Sim</option>
+          <option value="nao">Não</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Destinatário Contribuinte de ICMS?</label>
+        <select id="batch-contrib">
+          <option value="auto">🔄 Automático (detectar do XML)</option>
+          <option value="sim">Sim (contribuinte)</option>
+          <option value="nao">Não (não-contribuinte)</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg2" style="margin-top:12px">
+      <div class="fg">
+        <label>Alíquota Interna do Destino (%)</label>
+        <select id="batch-aliq-interna">
+          <option value="auto">🔄 Automático (XML ou Tabela Padrão)</option>
+          <option value="7">7% - Forçar para todos os itens</option>
+          <option value="12">12% - Forçar para todos os itens</option>
+          <option value="17">17% - Forçar para todos os itens</option>
+          <option value="18">18% - Forçar para todos os itens (SP padrão)</option>
+          <option value="20">20% - Forçar para todos os itens</option>
+          <option value="25">25% - Forçar para todos os itens</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Alíquota Customizada (%)</label>
+        <input type="number" id="batch-aliq-custom" placeholder="Ex: 18.5" step="0.01" min="0" max="30" style="background:var(--surface2)">
+      </div>
+    </div>
+    <div style="margin-top:12px;padding:10px;background:rgba(78,205,196,.05);border:1px solid rgba(78,205,196,.2);border-radius:6px;font-size:.7rem;color:var(--accent2)">
+      💡 <strong>Dica:</strong> Selecione "Automático" para usar alíquota do XML ou tabela padrão, ou <strong>force uma alíquota</strong> para aplicar a mesma alíquota interna em todos os itens. Use o campo "Alíquota Customizada" para valores específicos (ex: 18.5%).
+    </div>
+  </div>
+
+  <div class="batch-upz" id="batch-upz">
+    <input type="file" accept=".xml" id="batch-xml-files" multiple>
+    <div class="upi">📦</div>
+    <div class="upl">Upload de múltiplos XMLs</div>
+    <div class="uph">Selecione vários arquivos XML da NF-e para processar em lote</div>
+    <div class="upf" id="batch-upf"></div>
+  </div>
+
+  <div id="batch-files-list" class="batch-files"></div>
+
+  <button class="bgo" id="batch-process-btn" style="display:none">⚡ Processar Todos os Arquivos</button>
+  <div class="lbar" id="batch-lbar"></div>
+
+  <div id="batch-results-container" style="display:none">
+    <div class="batch-summary">
+      <div class="stitle">📊 Resumo do Processamento</div>
+      <div class="batch-summary-grid">
+        <div class="batch-summary-item">
+          <div class="batch-summary-value total" id="batch-total-files">0</div>
+          <div class="batch-summary-label">Total de Arquivos</div>
+        </div>
+        <div class="batch-summary-item">
+          <div class="batch-summary-value success" id="batch-with-difal">0</div>
+          <div class="batch-summary-label">Com DIFAL</div>
+        </div>
+        <div class="batch-summary-item">
+          <div class="batch-summary-value" id="batch-without-difal">0</div>
+          <div class="batch-summary-label">Sem DIFAL</div>
+        </div>
+        <div class="batch-summary-item">
+          <div class="batch-summary-value total" id="batch-total-difal">R$ 0,00</div>
+          <div class="batch-summary-label">DIFAL Total</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stitle">📋 Resultados Detalhados</div>
+    <div id="batch-results-list"></div>
+    
+    <button class="breset" id="batch-reset-btn" style="margin-top:16px">↩ Novo processamento</button>
+  </div>
+</div><!-- End tab-batch -->
+
+</div><!-- End wrap -->
+
+<script src="batch-processor.js"></script>
+
+<!-- PWA Service Worker Registration -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('./service-worker.js')
+      .then(registration => {
+        console.log('✅ PWA Service Worker registrado com sucesso!', registration.scope);
+      })
+      .catch(error => {
+        console.log('❌ Falha ao registrar Service Worker:', error);
+      });
+  });
+}
+</script>
+
+</body>
+</html>
