@@ -287,6 +287,37 @@
   }
 
   main { position: relative; z-index: 1; }
+
+  /* ── DARK MODE ── */
+  body.dark {
+    --bg: #0f1117;
+    --surface: #16181f;
+    --surface2: #1e2029;
+    --border: #2a2d3a;
+    --text: #e8eaf0;
+    --text-mid: #9ca3af;
+    --text-soft: #6b7280;
+  }
+  body.dark nav {
+    background: rgba(15,17,23,0.92);
+  }
+  body.dark .bg-grid {
+    background-image:
+      linear-gradient(rgba(245,130,31,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,130,31,0.06) 1px, transparent 1px);
+  }
+
+  /* Toggle button */
+  #theme-toggle {
+    position: fixed; bottom: 24px; right: 24px; z-index: 999;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--orange); color: #fff;
+    border: none; cursor: pointer; font-size: 20px;
+    box-shadow: 0 4px 16px rgba(245,130,31,0.4);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s;
+  }
+  #theme-toggle:hover { transform: scale(1.1); }
 </style>
 </head>
 <body>
@@ -306,13 +337,13 @@
   <!-- HERO -->
   <section class="hero">
     <div class="hero-logo">
-      <img src="uploads/Logo_Libers-removebg-preview.png" alt="Libers Assessoria Contábil">
+      <img src="uploads/Logo_Libers-removebg-preview.png" alt="Libers Assessoria Contábil" style="width: 180px; height: 180px">
     </div>
     <div class="hero-eyebrow">
       <span></span>
       Portal de Ferramentas
     </div>
-    <h1>Ferramentas <em>inteligentes</em><br>para a equipe Libers</h1>
+    <h1>Ferramentas <em>inteligentes</em><br>para a equipe Liber's</h1>
     <p>Acesse os aplicativos internos desenvolvidos para otimizar os processos da assessoria contábil.</p>
   </section>
 
@@ -403,11 +434,13 @@
     document.getElementById('modal-title').textContent = title;
     document.getElementById('modal').classList.add('open');
     document.body.style.overflow = 'hidden';
+    document.getElementById('theme-toggle').style.display = 'none';
   }
   function closeApp() {
     const modal = document.getElementById('modal');
     modal.classList.remove('open');
     document.body.style.overflow = '';
+    document.getElementById('theme-toggle').style.display = 'flex';
     setTimeout(() => { document.getElementById('modal-iframe').src = ''; }, 300);
   }
   document.getElementById('modal').addEventListener('click', function(e) {
@@ -416,6 +449,22 @@
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeApp();
   });
+</script>
+
+<!-- Dark mode toggle -->
+<button id="theme-toggle" title="Alternar tema">🌙</button>
+<script>
+  (function() {
+    const btn = document.getElementById('theme-toggle');
+    const saved = localStorage.getItem('libers-theme');
+    if (saved === 'dark') { document.body.classList.add('dark'); btn.textContent = '☀️'; }
+    btn.addEventListener('click', function() {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      btn.textContent = isDark ? '☀️' : '🌙';
+      localStorage.setItem('libers-theme', isDark ? 'dark' : 'light');
+    });
+  })();
 </script>
 </body>
 </html>
