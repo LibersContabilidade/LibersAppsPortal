@@ -515,7 +515,7 @@
                         <td style="padding:8px;border:1px solid var(--border);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${Utils.esc(item.desc || '-')}</td>
                         <td style="padding:8px;border:1px solid var(--border)">${item.ncm || '-'}</td>
                         <td style="padding:8px;border:1px solid var(--border);font-weight:600">${item.cfop || '-'}</td>
-                        <td style="padding:8px;border:1px solid var(--border)">R$ ${Utils.fmt(item.base || 0)}</td>
+                        <td style="padding:8px;border:1px solid var(--border)">${item.baseOriginal !== undefined && item.baseOriginal !== item.base ? `<span title="Original: R$ ${Utils.fmt(item.baseOriginal)} | Base ajustada Simples Nacional">R$ ${Utils.fmt(item.base || 0)} <span style="color:var(--accent2);font-size:.6rem">★SN</span></span>` : `R$ ${Utils.fmt(item.base || 0)}`}</td>
                         <td style="padding:8px;border:1px solid var(--border);color:var(--blue);font-weight:700">${(item.aI || 0).toFixed(2)}%</td>
                         <td style="padding:8px;border:1px solid var(--border);color:var(--accent2);font-weight:700">${(item.aliqInt || item.aliq || 0).toFixed(2)}%</td>
                         <td style="padding:8px;border:1px solid var(--border);color:${item.vD > 0 ? 'var(--accent)' : 'var(--muted)'};font-weight:700">${(item.pct || 0).toFixed(2)}%</td>

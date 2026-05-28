@@ -839,18 +839,34 @@ function calcDifal(p) {
       continue;
     }
     
+    // SIMPLES NACIONAL: ajuste da base de cálculo pelo "por dentro"
+    // Se alíquota interestadual é 12% → base = vProd / 0,88
+    // Se alíquota interestadual é 4%  → base = vProd / 0,96
+    let baseCalc = base;
+    let baseAjuste = '';
+    if (p.reg === 'simples') {
+      if (aI_item === 12) {
+        baseCalc = +(base / 0.88).toFixed(2);
+        baseAjuste = `Base ajustada SN (÷0,88): R$${Utils.fmt(base)} → R$${Utils.fmt(baseCalc)}`;
+      } else if (aI_item === 4) {
+        baseCalc = +(base / 0.96).toFixed(2);
+        baseAjuste = `Base ajustada SN (÷0,96): R$${Utils.fmt(base)} → R$${Utils.fmt(baseCalc)}`;
+      }
+      if (baseAjuste) steps.push({ t: 'wn', m: baseAjuste });
+    }
+    
     const pct = (aliqInt - aI_item) / 100;
-    const vD = +(base * pct).toFixed(2);
-    const vF = CONFIG.FCP_STATES.includes(p.ufD) ? +(base * 0.02).toFixed(2) : 0;
+    const vD = +(baseCalc * pct).toFixed(2);
+    const vF = CONFIG.FCP_STATES.includes(p.ufD) ? +(baseCalc * 0.02).toFixed(2) : 0;
     
     totD += vD;
     totF += vF;
-    totB += base;
+    totB += baseCalc;
     
-    rows.push({ ...item, aI: aI_item, aliqInt, pct: pct * 100, vD, vF, disp: false, origemLabel });
+    rows.push({ ...item, base: baseCalc, baseOriginal: base, aI: aI_item, aliqInt, pct: pct * 100, vD, vF, disp: false, origemLabel, baseAjuste });
     steps.push({
       t: 'ok',
-      m: `NCM ${item.ncm || '—'} | ${origemLabel} | Inter: ${aI_item}% ${aliqSource} | Int: ${aliqInt}% | DIFAL: R$${Utils.fmt(vD)}`
+      m: `NCM ${item.ncm || '—'} | ${origemLabel} | Inter: ${aI_item}% ${aliqSource} | Int: ${aliqInt}% | Base: R$${Utils.fmt(baseCalc)}${baseAjuste ? ' (ajustada)' : ''} | DIFAL: R$${Utils.fmt(vD)}`
     });
   }
   
@@ -926,12 +942,15 @@ function showResult(r) {
             <td style="color:var(--muted);font-size:.62rem">${item.mot}</td>`;
         } else {
           const sc = item.fonte === 'IBPT' ? 'si' : item.fonte.includes('XML') ? 'sx' : 'st';
+          const baseDisplay = item.baseOriginal !== undefined && item.baseOriginal !== item.base
+            ? `<span title="Original: R$ ${Utils.fmt(item.baseOriginal)} | Ajustada SN">R$ ${Utils.fmt(item.base)} <span style="color:var(--accent2);font-size:.6rem">★SN</span></span>`
+            : `R$ ${Utils.fmt(item.base)}`;
           tr.innerHTML = `
             <td>${item.desc || '—'}</td><td>${item.ncm || '—'}</td>
             <td style="font-weight:600">${item.cfop || '—'}</td>
             <td><span class="src ${sc}">${item.fonte}</span></td>
             <td style="font-size:.68rem">${item.origemLabel}</td>
-            <td>R$ ${Utils.fmt(item.base)}</td>
+            <td>${baseDisplay}</td>
             <td>${item.aI}%</td>
             <td style="color:var(--accent2)">${item.aliqInt.toFixed(2)}%</td>
             <td style="color:var(--accent)">${item.pct.toFixed(2)}%</td>
